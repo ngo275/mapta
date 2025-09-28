@@ -1027,8 +1027,8 @@ def plot_success_correlation(data, output_dir):
     print(f"Tools vs Success: r={corr_tools:.3f}, p-value={p_tools:.3f}")
 
 def main():
-    logs_dir = "/Users/dachtuer/pentesting-agents/logs"
-    output_dir = "/Users/dachtuer/pentesting-agents/logs/analysis_output"
+    logs_dir = "./ctf-logs"
+    output_dir = "./analysis_output"
     
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
