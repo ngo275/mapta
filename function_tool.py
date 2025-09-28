@@ -17,7 +17,8 @@ def function_tool(func=None, *, name_override: Optional[str] = None):
         params_schema = {
             "type": "object",
             "properties": {},
-            "required": []
+            "required": [],
+            "additionalProperties": False
         }
         
         type_hints = get_type_hints(f)
