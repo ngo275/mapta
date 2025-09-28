@@ -44,8 +44,7 @@ def function_tool(func=None, *, name_override: Optional[str] = None):
                 "type": json_type
             }
             
-            if param.default == inspect.Parameter.empty:
-                params_schema["required"].append(param_name)
+            params_schema["required"].append(param_name)
         
         @wraps(f)
         async def wrapper(*args, **kwargs):
