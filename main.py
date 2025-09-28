@@ -3,7 +3,7 @@ import json
 import asyncio
 from typing import Any, Dict, Optional, List
 from openai import AsyncOpenAI
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import threading
 import logging
 import importlib
@@ -72,12 +72,12 @@ class UsageTracker:
     def __init__(self):
         self.main_agent_usage = []
         self.sandbox_agent_usage = []
-        self.start_time = datetime.now(UTC)
+        self.start_time = datetime.now(timezone.utc)
     
     def log_main_agent_usage(self, usage_data, target_url=""):
         """Log usage data from main agent responses."""
         entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "target_url": target_url,
             "agent_type": "main_agent",
             "usage": usage_data
@@ -88,7 +88,7 @@ class UsageTracker:
     def log_sandbox_agent_usage(self, usage_data, target_url=""):
         """Log usage data from sandbox agent responses."""
         entry = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "target_url": target_url,
             "agent_type": "sandbox_agent", 
             "usage": usage_data
@@ -99,7 +99,7 @@ class UsageTracker:
     def get_summary(self):
         """Get usage summary for all agents."""
         return {
-            "scan_duration": str(datetime.now(UTC) - self.start_time),
+            "scan_duration": str(datetime.now(timezone.utc) - self.start_time),
             "main_agent_calls": len(self.main_agent_usage),
             "sandbox_agent_calls": len(self.sandbox_agent_usage),
             "total_calls": len(self.main_agent_usage) + len(self.sandbox_agent_usage),
@@ -109,7 +109,7 @@ class UsageTracker:
     
     def save_to_file(self, filename_prefix=""):
         """Save usage data to JSON file."""
-        timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"{filename_prefix}usage_log_{timestamp}.json"
         
         with open(filename, "w", encoding='utf-8') as f:
@@ -336,7 +336,7 @@ async def send_slack_security_alert(
         "elements": [
             {
                 "type": "mrkdwn",
-                "text": f"Detected at: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                "text": f"Detected at: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
             }
         ]
     })
@@ -467,7 +467,7 @@ async def send_slack_scan_summary(
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"Scan Duration: {scan_duration} | Completed: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                    "text": f"Scan Duration: {scan_duration} | Completed: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
                 }
             ]
         })
@@ -982,7 +982,7 @@ async def run_single_target_scan(target_url: str, system_prompt: str, base_user_
         
         # Save result to file
         with open(filename, "w", encoding='utf-8') as f:
-            f.write(result)
+            f.write(str(result) if result is not None else "")
         
         # Save usage data
         site_name = target_url.replace("https://", "").replace("http://", "").split('/')[0]
@@ -1032,7 +1032,7 @@ async def run_parallel_scans(targets: List[str], system_prompt: str, base_user_p
         if isinstance(result, Exception):
             print(f"Task failed with exception: {result}")
             errors += 1
-        elif result.get("status") == "completed":
+        elif isinstance(result, dict) and result.get("status") == "completed":
             completed += 1
         else:
             errors += 1
