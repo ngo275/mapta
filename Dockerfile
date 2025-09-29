@@ -24,12 +24,16 @@ RUN pip install --no-cache-dir \
 # Copy application code
 COPY . .
 
+# Ensure environment configuration files are present for network egress fix
+RUN chmod +x setup_environment.sh
+
 # Create necessary directories
 RUN mkdir -p /app/reports /app/analysis_output
 
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+ENV SANDBOX_FACTORY=local_sandbox_factory:create_local_sandbox
 
 # Create a non-root user for security
 RUN useradd -m -u 1000 mapta && \
